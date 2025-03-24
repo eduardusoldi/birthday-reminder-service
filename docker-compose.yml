@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   api:
     container_name: birthday-reminder-api
@@ -22,6 +20,18 @@ services:
       - "27017:27017"
     volumes:
       - mongo-data:/data/db
+
+  birthday-worker:
+    build: .
+    container_name: birthday-worker
+    command: [ "node", "workers/birthdayWorker.js" ]
+    depends_on:
+      - mongodb
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/mydatabase
+    volumes:
+      - .:/app
+      - /app/node_modules
 
 volumes:
   mongo-data:
