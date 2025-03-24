@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   api:
+    container_name: birthday-reminder-api
     build: .
     ports:
       - "5000:5000"
@@ -15,7 +16,7 @@ services:
 
   mongodb:
     image: mongo:6.0
-    container_name: my-mongo
+    container_name: mongo-database
     restart: always
     ports:
       - "27017:27017"
