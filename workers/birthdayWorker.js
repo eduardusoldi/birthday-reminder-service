@@ -1,55 +1,54 @@
 require("dotenv").config();
 const mongoose = require("mongoose");
+const User = require("../models/User");
 const moment = require("moment-timezone");
-const cron = require("node-cron");
-const User = require("../models/User"); // Ensure you have a User model
 
 const MONGO_URI = process.env.MONGO_URI || "mongodb://mongodb:27017/mydatabase";
+const databaseName = process.env.dbName || "mydatabase"
 
-// Connect to MongoDB (only once)
-mongoose.connect(MONGO_URI, { dbName: "mydatabase" })
+// Connect worker to database
+mongoose
+  .connect(MONGO_URI, { dbName: databaseName })
   .then(() => console.log("🎂 Birthday Worker: Connected to MongoDB"))
-  .catch((err) => console.error("MongoDB connection error:", err));
+  .catch((err) => console.error("❌ MongoDB connection error:", err));
 
-async function sendBirthdayMessages() {
-  const nowUTC = moment().utc(); // ✅ Get current UTC time
+// The worker
+async function checkBirthdays() {
+  const nowUTC = moment.utc(); // Get current UTC time
+  console.log("🕒 Current UTC time:", nowUTC.format());
 
-  try {
-    const users = await User.find({}); // ✅ Fetch all users
-    console.log(`🔍 Checking birthdays for ${users.length} users...`);
+  // Fetch users whose birthday is today
+  const users = await User.find();
+  console.log(`🔍 Checking birthdays for ${users.length} users...`);
 
-    const birthdayUsers = users.filter((user) => {
-      const userTime = nowUTC.clone().tz(user.timezone); // ✅ Convert UTC to user's timezone
-      return (
-        moment(user.birthday).tz(user.timezone).format("MM-DD") === userTime.format("MM-DD") &&
-        userTime.format("HH") === "09"
-      );
+  for (const user of users) {
+    const { name, email, birthday, timezone } = user;
+    if (!timezone) continue;
+
+    // Check the timezone using moment-timezone
+    const todayLocal = moment.tz(timezone).startOf("day");
+    const userBirthdayLocal = todayLocal.set({
+      month: moment(birthday).month(),
+      date: moment(birthday).date(),
+      hour: 9,
+      minute: 0,
+      second: 0
     });
 
-    if (birthdayUsers.length > 0) {
-      const names = birthdayUsers.map(user => user.name).join(", ");
-      const emails = birthdayUsers.map(user => user.email).join(", ");
+    // Convert to UTC
+    const userBirthdayUTC = userBirthdayLocal.clone().utc();
 
-      console.log(`🎉 Found users with birthday today: ${names}`);
-      console.log(`🎉 Sending birthday email to: ${emails}`);
-      
-      // Simulate email sending
-      birthdayUsers.forEach(user => {
-        console.log(`📩 Happy Birthday, ${user.name}! Email sent to ${user.email}`);
-      });
-    } else {
-      console.log("✅ No birthdays at this hour.");
+    // Check if current UTC time matches
+    if (nowUTC.isSame(userBirthdayUTC, "hour")) {
+      console.log(`🎉 Happy Birthday, ${name}! 🎂 (Email: ${email})`);
+      // Add email sending logic here
     }
-  } catch (error) {
-    console.error("❌ Error checking birthdays:", error);
   }
 }
 
-// Schedule to run **every hour**
-cron.schedule("0 * * * *", () => {
-  console.log("⏳ Running birthday worker...");
-  sendBirthdayMessages();
-});
-
-// Run immediately on start
-sendBirthdayMessages();
+checkBirthdays()
+  .then(() => {
+    console.log("✅ Birthday check completed.");
+    mongoose.connection.close();
+  })
+  .catch((err) => console.error("❌ Internal server error:", err));
