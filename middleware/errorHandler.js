@@ -9,6 +9,8 @@ const errorHandler = (err, req, res, next) => {
             switch (error.path) {
                 case 'email':
                     return 'The email format is invalid';
+                case 'birthday':
+                    return 'The birthday format is invalid';
                 case 'timezone':
                     return 'The timezone must be a valid IANA timezone';
                 default:
@@ -23,9 +25,6 @@ const errorHandler = (err, req, res, next) => {
 
     // Check for invalid ID format
     if (err.name === 'CastError') {
-        if (err.path === "birthday") {
-            return res.status(400).json({message: "Invalid birthday date."})
-        }
         return res.status(400).json({ message: "Invalid ID format." })
     }
 
@@ -41,7 +40,7 @@ const errorHandler = (err, req, res, next) => {
             message: err.msg
         })
     }
-    // Catch all other errors (server issues, etc.)
+    
     return res.status(500).json({
         message: 'Internal Server Error',
     });

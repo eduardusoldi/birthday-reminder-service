@@ -6,6 +6,18 @@ class UserController {
         try {
             const { name, email, birthday, timezone } = req.body
 
+            if (!Object.keys(req.body).length) {
+                throw { status: 400, msg: "Please fill the fields." };
+            }
+
+            const allowedFields = ["name", "email", "birthday", "timezone"];
+            const createField = Object.keys(req.body);
+
+            const invalidFields = createField.filter(field => !allowedFields.includes(field));
+            if (invalidFields.length) {
+                throw { status: 400, msg: `Invalid fields: ${invalidFields.join(", ")}` };
+            }
+
             const requiredFields = { name, email, birthday, timezone };
             for (const [key, value] of Object.entries(requiredFields)) {
                 if (!value) throw { status: 400, msg: `Please insert ${key}` };
@@ -36,7 +48,13 @@ class UserController {
             const user = await User.findById(req.params.id, { createdAt: 0, updatedAt: 0, __v: 0 }).lean();
             if (!user) throw { status: 404, msg: "User not found" }
 
-            const formattedUser = user ? { _id: user._id, ...user } : null;
+            const formattedUser = {
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                birthday: user.birthday,
+                timezone: user.timezone,
+            }
             res.json(formattedUser);
         } catch (error) {
             next(error)
@@ -46,8 +64,10 @@ class UserController {
 
     static async updateUser(req, res, next) {
         try {
-            if (req.body.length === 0 ) throw {status: 404, msg: "Please insert the fields"}
-            
+            if (!Object.keys(req.body).length) {
+                throw { status: 400, msg: "Please fill minimum one field." };
+            }
+
             const allowedFields = ["name", "email", "birthday", "timezone"];
             const updateFields = Object.keys(req.body);
 
@@ -70,7 +90,7 @@ class UserController {
                 birthday: user.birthday,
                 timezone: user.timezone,
             }
-            res.json(formattedUser);
+            res.json({message: "User updated successfully", data: formattedUser});
         } catch (error) {
             next(error);
         }

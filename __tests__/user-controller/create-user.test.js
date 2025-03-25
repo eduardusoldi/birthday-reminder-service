@@ -55,6 +55,19 @@ describe("Create user API test", () => {
         expect(response.body).toHaveProperty("message", "Please fill the fields.")
     });
 
+    it("should return 400 status code when the request body either name, birthday, timezone, or email not given", async () => {
+        let userRequestBody = {
+            name: "only name"
+        };
+
+        const response = await request(app)
+            .post("/api/users")
+            .send(userRequestBody);
+
+        expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty("message", "Please insert email")
+    });
+
     it("should return a 400 status code when an invalid email is provided", async () => {
         let userRequestBody = {
             name: "Success User",
@@ -101,6 +114,24 @@ describe("Create user API test", () => {
 
         expect(response.status).toBe(400);
         expect(response.body).toHaveProperty("message", "The timezone must be a valid IANA timezone")
+    });
+
+    it("should return a 400 status code when the invalid fields is given", async () => {
+        let userRequestBody = {
+            name: "Email Taken",
+            email: "taken@email.com",
+            birthday: "2010-10-10",
+            timezone: "Asia/Jakarta",
+            invalidFields1: "invalid fields1",
+            invalidFields2: "invalid fields2",
+        };
+
+        const response = await request(app)
+            .post("/api/users")
+            .send(userRequestBody);
+
+        expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty("message", "Invalid fields: invalidFields1, invalidFields2")
     });
 
     it("should return a 400 status code when the provided email is already taken", async () => {
