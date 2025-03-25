@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon app.js",
+    "dev": "nodemon bin/www",
     "test": "jest --detectOpenHandles --forceExit --runInBand --coverage --silent",
     "start": "node bin/www"
   },
