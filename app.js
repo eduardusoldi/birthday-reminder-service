@@ -6,7 +6,6 @@ const router = require("./routes");
 const errorHandler = require("./middleware/errorHandler");
 
 const app = express();
-const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI || "mongodb://mongodb:27017/mydatabase";
 
 app.use(cors());
@@ -22,4 +21,4 @@ mongoose.connect(MONGO_URI, {
 app.use(router);
 app.use(errorHandler)
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+module.exports = app;
