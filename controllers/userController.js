@@ -1,6 +1,7 @@
 const User = require("../models/User");
 
 class UserController {
+    // Create a user
     static async createUser(req, res, next) {
         try {
             const { name, email, birthday, timezone } = req.body
@@ -41,7 +42,7 @@ class UserController {
             next(error)
         }
     }
-
+    // Retrieve a user's details by ID
     static async retrieveUserById(req, res, next) {
         try {
             const user = await User.findById(req.params.id, { createdAt: 0, updatedAt: 0, __v: 0 }).lean();
@@ -59,7 +60,7 @@ class UserController {
             next(error)
         }
     }
-
+    // Update user's details
     static async updateUser(req, res, next) {
         try {
             if (!Object.keys(req.body).length) {
@@ -93,7 +94,7 @@ class UserController {
             next(error);
         }
     }
-
+    // Delete a user
     static async deleteUser(req, res, next) {
         try {
             const user = await User.findByIdAndDelete(req.params.id);

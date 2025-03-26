@@ -17,6 +17,7 @@ const sendBirthdayMessages = async () => {
     const allUsers = await User.find({});
     console.log(`👥 Found ${allUsers.length} users in the database`);
 
+    // Filter to find within yesterday until tomorrow
     const usersWithBirthday = await User.find({
       $expr: {
         $and: [
@@ -43,7 +44,7 @@ const sendBirthdayMessages = async () => {
         }
 
       }      
-
+    // Determine if in user timezone is 9.00AM or not
     for (const user of validBirthdayUsers) {
         const userLocalTime = moment().tz(user.timezone).format("HH");
   
