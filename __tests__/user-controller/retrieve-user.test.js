@@ -1,11 +1,11 @@
 const request = require("supertest");
 const mongoose = require("mongoose");
 const app = require("../../app");
-const connectDB = require("../../config/db"); 
+const connectDB = require("../../config/db");
 const User = require("../../models/User");
 
 describe("Retrieve user API test", () => {
-    let user; 
+    let user;
 
     beforeAll(async () => {
         await connectDB();
@@ -52,6 +52,4 @@ describe("Retrieve user API test", () => {
         expect(response.status).toBe(404);
         expect(response.body).toHaveProperty("message", "User not found");
     });
-
-
 });

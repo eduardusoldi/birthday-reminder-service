@@ -95,7 +95,4 @@ describe("Update user API test", () => {
         expect(response.status).toBe(404);
         expect(response.body).toHaveProperty("message", "User not found");
     });
-
-
-
 })

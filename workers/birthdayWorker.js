@@ -5,11 +5,8 @@ const moment = require("moment-timezone");
 const User = require("../models/User");
 
 const MONGO_URI = process.env.MONGO_URI || "mongodb://mongodb:27017/mydatabase";
-
 mongoose.connect(MONGO_URI, { dbName: "mydatabase" })
 
-
-// Birthday Worker Function
 const sendBirthdayMessages = async () => {
   try {
     const startDate = moment().subtract(1, "day").format("MM-DD");
@@ -17,11 +14,9 @@ const sendBirthdayMessages = async () => {
 
     console.log(`🔍 Checking users with birthdays between ${startDate} and ${endDate}`);
 
-    // Find all users
     const allUsers = await User.find({});
     console.log(`👥 Found ${allUsers.length} users in the database`);
 
-    // Query users whose birthday is between yesterday and tomorrow (ignoring year)
     const usersWithBirthday = await User.find({
       $expr: {
         $and: [

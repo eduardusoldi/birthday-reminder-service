@@ -20,14 +20,10 @@ describe("MongoDB Connection", () => {
   it("should connect to the correct database in test environment", async () => {
     const mockUriTest = "mongodb://mongodb:27017/mydatabase_test";
     const mockDbNameTest = "mydatabase_test";
-
-    // Simulate a successful connection for the test environment
     mongoose.connect.mockResolvedValue();
 
-    // Set the environment to test (true to simulate test environment)
     const isTestEnv = true;
 
-    // Connect with the test URI and DB name
     await connectDB(isTestEnv);
 
     expect(mongoose.connect).toHaveBeenCalledWith(mockUriTest, {

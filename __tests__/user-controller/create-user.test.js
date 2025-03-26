@@ -149,6 +149,4 @@ describe("Create user API test", () => {
         expect(response.status).toBe(400);
         expect(response.body).toHaveProperty("message", `The email ${userRequestBody.email} is already taken. Please choose a different email.`)
     });
-
-
 });

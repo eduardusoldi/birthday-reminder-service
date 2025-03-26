@@ -25,7 +25,6 @@ describe("Delete user API test", () => {
         await mongoose.connection.close();
     });
 
-
     it("should return 200 status code when successfully delete user by ID", async () => {
         const response = await request(app)
             .delete(`/api/users/${user._id}`)
@@ -52,5 +51,4 @@ describe("Delete user API test", () => {
         expect(response.status).toBe(404);
         expect(response.body).toHaveProperty("message", "User not found");
     });
-
 })

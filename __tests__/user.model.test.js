@@ -10,7 +10,7 @@ afterAll(async () => {
 });
 
 describe("User Model Validation", () => {
-  
+
   test("Should create a valid user", async () => {
     const user = new User({
       name: "John Doe",

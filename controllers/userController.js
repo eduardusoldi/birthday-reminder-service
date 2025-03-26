@@ -1,7 +1,6 @@
 const User = require("../models/User");
 
 class UserController {
-
     static async createUser(req, res, next) {
         try {
             const { name, email, birthday, timezone } = req.body
@@ -61,7 +60,6 @@ class UserController {
         }
     }
 
-
     static async updateUser(req, res, next) {
         try {
             if (!Object.keys(req.body).length) {
@@ -90,12 +88,11 @@ class UserController {
                 birthday: user.birthday,
                 timezone: user.timezone,
             }
-            res.json({message: "User updated successfully", data: formattedUser});
+            res.json({ message: "User updated successfully", data: formattedUser });
         } catch (error) {
             next(error);
         }
     }
-
 
     static async deleteUser(req, res, next) {
         try {
