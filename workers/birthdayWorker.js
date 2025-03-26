@@ -1,54 +1,75 @@
 require("dotenv").config();
 const mongoose = require("mongoose");
-const User = require("../models/User");
+const cron = require("node-cron");
 const moment = require("moment-timezone");
+const User = require("../models/User");
 
 const MONGO_URI = process.env.MONGO_URI || "mongodb://mongodb:27017/mydatabase";
-const databaseName = process.env.dbName || "mydatabase"
 
-// Connect worker to database
-mongoose
-  .connect(MONGO_URI, { dbName: databaseName })
-  .then(() => console.log("🎂 Birthday Worker: Connected to MongoDB"))
-  .catch((err) => console.error("❌ MongoDB connection error:", err));
+mongoose.connect(MONGO_URI, { dbName: "mydatabase" })
 
-// The worker
-async function checkBirthdays() {
-  const nowUTC = moment.utc(); // Get current UTC time
-  console.log("🕒 Current UTC time:", nowUTC.format());
 
-  // Fetch users whose birthday is today
-  const users = await User.find();
-  console.log(`🔍 Checking birthdays for ${users.length} users...`);
+// Birthday Worker Function
+const sendBirthdayMessages = async () => {
+  try {
+    const startDate = moment().subtract(1, "day").format("MM-DD");
+    const endDate = moment().add(1, "day").format("MM-DD");
 
-  for (const user of users) {
-    const { name, email, birthday, timezone } = user;
-    if (!timezone) continue;
+    console.log(`🔍 Checking users with birthdays between ${startDate} and ${endDate}`);
 
-    // Check the timezone using moment-timezone
-    const todayLocal = moment.tz(timezone).startOf("day");
-    const userBirthdayLocal = todayLocal.set({
-      month: moment(birthday).month(),
-      date: moment(birthday).date(),
-      hour: 9,
-      minute: 0,
-      second: 0
+    // Find all users
+    const allUsers = await User.find({});
+    console.log(`👥 Found ${allUsers.length} users in the database`);
+
+    // Query users whose birthday is between yesterday and tomorrow (ignoring year)
+    const usersWithBirthday = await User.find({
+      $expr: {
+        $and: [
+          {
+            $gte: [{ $dateToString: { format: "%m-%d", date: "$birthday" } }, startDate],
+          },
+          {
+            $lte: [{ $dateToString: { format: "%m-%d", date: "$birthday" } }, endDate],
+          },
+        ],
+      },
     });
 
-    // Convert to UTC
-    const userBirthdayUTC = userBirthdayLocal.clone().utc();
+    console.log(`🎉 Found ${usersWithBirthday.length} users with birthdays in range`);
 
-    // Check if current UTC time matches
-    if (nowUTC.isSame(userBirthdayUTC, "hour")) {
-      console.log(`🎉 Happy Birthday, ${name}! 🎂 (Email: ${email})`);
-      // Add email sending logic here
+    let validBirthdayUsers = [];
+
+    for (const user of usersWithBirthday) {
+        const userLocalDate = moment(user.birthday).tz(user.timezone).format("MM-DD");
+        const todayLocal = moment().tz(user.timezone).format("MM-DD");
+
+        if (userLocalDate === todayLocal) {
+          validBirthdayUsers.push(user);
+        }
+
+      }      
+
+    for (const user of validBirthdayUsers) {
+        const userLocalTime = moment().tz(user.timezone).format("HH");
+  
+        if (userLocalTime === "09") {
+          console.log(`🎉 Happy Birthday, ${user.name}!`);
+          console.log(`📩 Sending birthday email to: ${user.email}`);
+        } else {
+          console.log(`⏳ Not 9 AM yet in ${user.timezone}, skipping ${user.name}`);
+        }
+      }
+    } catch (error) {
+      console.error("⚠️ Error in Birthday Worker:", error);
     }
-  }
-}
+};
 
-checkBirthdays()
-  .then(() => {
-    console.log("✅ Birthday check completed.");
-    mongoose.connection.close();
-  })
-  .catch((err) => console.error("❌ Internal server error:", err));
+// Schedule Worker to Run Every Hour
+cron.schedule("0 * * * *", async () => {
+  console.log("⏰ Running Birthday Worker...");
+  await sendBirthdayMessages();
+});
+
+console.log("🎯 Birthday Worker Scheduled to Run Every Hour");
+
+module.exports = {sendBirthdayMessages}

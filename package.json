@@ -23,6 +23,8 @@
   },
   "devDependencies": {
     "jest": "^29.7.0",
+    "jest-mock-console": "^2.0.0",
+    "mockdate": "^3.0.5",
     "mongodb-memory-server": "^10.1.4",
     "nodemon": "^3.1.9",
     "supertest": "^7.1.0"

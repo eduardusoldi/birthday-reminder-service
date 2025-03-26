@@ -1,6 +1,6 @@
 const errorHandler = (err, req, res, next) => {
     // Log the error (you can use any logger here)
-    console.error(err, "ini nama");
+    console.error(err);
 
     // Check for validation errors
     if (err.name === 'ValidationError') {
