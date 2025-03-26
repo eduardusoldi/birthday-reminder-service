@@ -237,7 +237,7 @@ The Birthday Worker is a scheduled background job that runs every hour using nod
 ### B.1.1 Case: User's Birthday Triggered
 In this case, the worker identifies a user whose birthday matches the current date and their local time is 9 AM, triggering the birthday email.
 
-```json
+```
 Birthday Worker Scheduled to Run Every Hour
 ⏰ Running Birthday Worker...
 🔍 Checking users with birthdays between 03-25 and 03-27
@@ -248,7 +248,7 @@ Birthday Worker Scheduled to Run Every Hour
 ```
 ### B.1.2 Case: User's Birthday Detected but Skipped
 Here, the worker finds a user with a birthday on the current date but skips sending the email because their local time has not yet reached 9 AM.
-```json
+```
 Birthday Worker Scheduled to Run Every Hour
 ⏰ Running Birthday Worker...
 🔍 Checking users with birthdays between 03-25 and 03-27

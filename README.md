@@ -40,3 +40,6 @@ npm run test
 
 ## API Documentation
 For detailed information on available endpoints, request formats, and responses, check out the [API Documentation](./API_DOCS.md).
+
+## Notes
+This project was developed as part of a recruitment assessment. If you have any questions or need further clarification, feel free to reach out. 
