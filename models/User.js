@@ -1,31 +1,39 @@
-const mongoose = require("mongoose");
-const moment = require("moment-timezone");
+const mongoose = require('mongoose');
+const momentTimezone = require('moment-timezone');
 
-const userSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  email: { 
-    type: String, 
-    required: true, 
-    unique: true, 
-    validate: [require("validator").isEmail, "Invalid email format"] 
+const validateEmail = (email) => /\S+@\S+\.\S+/.test(email);
+
+const validateTimezone = (timezone) => {
+  return momentTimezone.tz.zone(timezone) !== null;
+};
+
+const UserSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: [true, "Name is required"],
+    trim: true,
   },
-  birthday: { 
-    type: String, 
-    required: true, 
-    validate: [require("validator").isISO8601, "Invalid date format"] 
+  email: {
+    type: String,
+    required: [true, "Email is required"],
+    unique: true,
+    validate: [validateEmail, "Invalid email format"]
+  },
+  birthday: {
+    type: Date,
+    required: [true, "Birthday is required"],
+    validate: {
+      validator: function (value) {
+        return value <= Date.now();
+      },
+      message: "Birthday must be a valid date in the past"
+    }
   },
   timezone: {
     type: String,
-    required: true,
-    validate: {
-      validator: function (tz) {
-        console.log("Validating timezone:", tz);  // 🔍 Debugging log
-        return moment.tz.names().includes(tz);
-      },
-      message: "Invalid IANA timezone",
-    },
-  },
-});
+    required: [true, "Timezone is required"],
+    validate: [validateTimezone, "Invalid IANA timezone"]
+  }
+}, { timestamps: true });
 
-const User = mongoose.model("User", userSchema);
-module.exports = User;
+module.exports = mongoose.model('User', UserSchema);
